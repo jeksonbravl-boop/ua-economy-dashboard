@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import requests
+import plotly.express as px  # ДОДАЛИ БІБЛІОТЕКУ ДЛЯ ГРАФІКІВ
 
 # Налаштування сторінки
 st.set_page_config(page_title="Економіка України", layout="wide")
@@ -40,7 +41,7 @@ def fetch_wb_data():
     
     return pd.DataFrame()
 
-# Виводимо спінер, поки дані вантажаться
+# Виводимо спінер
 with st.spinner('Підключення до бази даних Світового банку...'):
     df = fetch_wb_data()
 
@@ -49,7 +50,32 @@ st.markdown("---")
 if not df.empty:
     st.success(" Дані успішно завантажено та оброблено!")
     
-    st.subheader(" Сирі дані (останні 15 років)")
-    st.dataframe(df.tail(15), use_container_width=True)
+    # --- БЛОК 1: ГРАФІКИ ---
+    st.header(" Динаміка макроекономічних показників")
+    
+    # Створюємо 3 вкладки (Tabs) для зручного перемикання між графіками
+    tab1, tab2, tab3 = st.tabs([" ВВП", " Інфляція", " Безробіття"])
+    
+    with tab1:
+        fig_gdp = px.line(df, x='Рік', y='ВВП (Річне зростання, %)', markers=True, title='Динаміка ВВП України')
+        fig_gdp.update_xaxes(type='category') # Робимо роки чіткими
+        st.plotly_chart(fig_gdp, use_container_width=True)
+        
+    with tab2:
+        # Інфляцію зробимо червоним кольором
+        fig_inf = px.line(df, x='Рік', y='Інфляція (%)', markers=True, title='Рівень інфляції', color_discrete_sequence=['red'])
+        fig_inf.update_xaxes(type='category')
+        st.plotly_chart(fig_inf, use_container_width=True)
+        
+    with tab3:
+        # Безробіття зробимо помаранчевим
+        fig_unemp = px.line(df, x='Рік', y='Безробіття (%)', markers=True, title='Рівень безробіття', color_discrete_sequence=['orange'])
+        fig_unemp.update_xaxes(type='category')
+        st.plotly_chart(fig_unemp, use_container_width=True)
+
+    # --- БЛОК 2: ТАБЛИЦЯ ---
+    with st.expander("Переглянути сирі дані (таблиця)"):
+        st.dataframe(df.tail(15), use_container_width=True)
+        
 else:
-    st.error(" Не вдалося завантажити дані.")
+    st.error(" Не вдалося завантажити дані. Спробуйте оновити сторінку.")
