@@ -73,7 +73,25 @@ if not df.empty:
         fig_unemp.update_xaxes(type='category')
         st.plotly_chart(fig_unemp, use_container_width=True)
 
-    # --- БЛОК 2: ТАБЛИЦЯ ---
+   # --- БЛОК 2: КОРЕЛЯЦІЯ ---
+    st.markdown("---")
+    st.header("🔗 Зв'язок між показниками (Кореляція)")
+    st.write("Теплова карта показує, як макроекономічні показники впливають один на одного. **1** — сильний прямий зв'язок, **-1** — сильний зворотний зв'язок.")
+    
+    # Розраховуємо кореляцію
+    corr_matrix = df.drop(columns=['Рік']).corr().round(2)
+    
+    # Малюємо кольорову теплову карту
+    fig_corr = px.imshow(
+        corr_matrix, 
+        text_auto=True, 
+        aspect="auto",
+        color_continuous_scale='RdBu_r', 
+        title="Теплова карта кореляції"
+    )
+    st.plotly_chart(fig_corr, use_container_width=True)
+
+    # --- БЛОК 3: ТАБЛИЦЯ ---
     with st.expander("Переглянути сирі дані (таблиця)"):
         st.dataframe(df.tail(15), use_container_width=True)
         
